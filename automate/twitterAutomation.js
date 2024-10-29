@@ -175,15 +175,15 @@ export async function automateTwitterPost(credentials, content) {
 
         // Handle posting a tweet
     try {
-    // Locate the contenteditable div that acts as the textarea
-    console.log('logged in successful, waiting for Tweet text input...')
-    const tweetInput = await driver.wait(
-        until.elementLocated(By.xpath('//div[@data-testid="tweetTextarea_0"]')),
-        10000000
-    );
-
-    // Ensure the element is interactable
-    await driver.wait(until.elementIsVisible(tweetInput), 10000000);
+        console.log('Logged in successful, waiting for tweet input....')
+        const tweetInput = await driver.wait(
+            until.elementLocated(By.xpath('//div[@data-testid="tweetTextarea_0" and @contenteditable="true"]')),
+            1000000 // Timeout of 10 seconds
+        );
+    
+        // Ensure the element is visible and enabled
+        await driver.wait(until.elementIsVisible(tweetInput), 10000000);
+        await driver.wait(until.elementIsEnabled(tweetInput), 10000000);
 
     // Clear any existing text (if necessary)
     // This may not work for contenteditable divs, so you can skip this step if it fails.
