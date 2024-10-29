@@ -35,7 +35,7 @@ app.use(express.json());
 
 // CORS setup
 app.use(cors({
-    origin: 'http://localhost:5173',  // Allow your frontend origin
+    origin: ['http://localhost:5173', 'https://magicquill-ai.netlify.app'], // Allow your frontend origin
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow preflight and other methods
     allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
   }));
