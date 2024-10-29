@@ -194,24 +194,68 @@ export async function automateTwitterPost(credentials, content) {
     // Replace your tweet posting section with this:
         try {
             console.log('Logged in successful, waiting for tweet input....')
+            await sleep(5000);
+            
             const tweetInput = await driver.wait(
-                until.elementLocated(By.xpath('//div[@data-testid="tweetTextarea_0" and @contenteditable="true"]')),
-                1000000
+                until.elementLocated(By.css('div[data-testid="tweetTextarea_0"]')),
+                20000
             );
-
-            await driver.wait(until.elementIsVisible(tweetInput), 10000000);
-            await driver.wait(until.elementIsEnabled(tweetInput), 10000000);
-
+            
+            await driver.wait(until.elementIsVisible(tweetInput), 10000);
+            await driver.wait(until.elementIsEnabled(tweetInput), 10000);
+            
+            // Sanitize and encode content for JavaScript execution
+            const sanitizedContent = content
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, '\\n');
+            
+            // Try multiple methods to input text with emoji support
+            try {
+                // Method 1: Using executeScript with sanitized content
+                await driver.executeScript("arguments[0].click();", tweetInput);
+                await driver.executeScript(`
+                    arguments[0].textContent = '${sanitizedContent}';
+                    arguments[0].dispatchEvent(new InputEvent('input', {
+                        bubbles: true,
+                        cancelable: true,
+                        inputType: 'insertText',
+                        data: '${sanitizedContent}'
+                    }));
+                `, tweetInput);
+            } catch (error) {
+                console.log('Direct input failed, trying character by character...');
+                try {
+                    // Method 2: Character by character input
+                    await driver.executeScript("arguments[0].click();", tweetInput);
+                    await sleep(1000);
+                    
+                    // Split content into array of characters (including emoji)
+                    const chars = [...content];
+                    for (const char of chars) {
+                        await tweetInput.sendKeys(char);
+                        await sleep(50);
+                    }
+                } catch (error) {
+                    // Method 3: Final fallback using sendKeys
+                    await driver.executeScript("arguments[0].click();", tweetInput);
+                    await sleep(1000);
+                    await tweetInput.sendKeys(content);
+                }
+            }
+            
+            await sleep(5000);
             // Copy content to clipboard
-            await copyToClipboard(content);
-            console.log('content copied to clipboard...')
-            await sleep(2000);
+            // await copyToClipboard(content);
+            // console.log('content copied to clipboard...')
+            // await sleep(2000);
 
-            // Click and paste content
-            await tweetInput.click();
-            await tweetInput.sendKeys(Key.CONTROL + 'v');
-            console.log('tweet pasted...')
-            await sleep(2000);
+            // // Click and paste content
+            // await tweetInput.click();
+            // await tweetInput.sendKeys(Key.CONTROL + 'v');
+            // console.log('tweet pasted...')
+            // await sleep(2000);
 
             // Try multiple methods to locate and click the tweet button
             try {
