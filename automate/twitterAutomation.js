@@ -85,7 +85,7 @@ export async function automateTwitterPost(credentials, content) {
                 // Login process
         const emailInput = await driver.wait(
             until.elementLocated(By.css('input[autocomplete="username"]')),
-            600000
+            10000000
         );
         await typeWithRandomDelay(emailInput, credentials.email);
         console.log('typed email...')
@@ -100,7 +100,7 @@ export async function automateTwitterPost(credentials, content) {
         try {
             const usernameInput = await driver.wait(
                 until.elementLocated(By.xpath('//input[@data-testid="ocfEnterTextTextInput"]')),
-                500000
+                10000000
             );
 
             if (usernameInput) {
@@ -135,7 +135,7 @@ export async function automateTwitterPost(credentials, content) {
         // Enter password
         const passwordInput = await driver.wait(
             until.elementLocated(By.xpath('//input[@type="password" and @autocomplete="current-password"]')),
-            1000000
+            10000000
         );
         await typeWithRandomDelay(passwordInput, credentials.password);
         console.log('password typed...')
@@ -176,13 +176,14 @@ export async function automateTwitterPost(credentials, content) {
         // Handle posting a tweet
     try {
     // Locate the contenteditable div that acts as the textarea
+    console.log('logged in successful, waiting for Tweet text input...')
     const tweetInput = await driver.wait(
         until.elementLocated(By.xpath('//div[@data-testid="tweetTextarea_0"]')),
-        600000
+        10000000
     );
 
     // Ensure the element is interactable
-    await driver.wait(until.elementIsVisible(tweetInput), 1000);
+    await driver.wait(until.elementIsVisible(tweetInput), 10000000);
 
     // Clear any existing text (if necessary)
     // This may not work for contenteditable divs, so you can skip this step if it fails.
@@ -190,6 +191,7 @@ export async function automateTwitterPost(credentials, content) {
 
     // Copy the content to the clipboard
     await copyToClipboard(content);
+    console.log('content copied to clipboard...')
 
     // // Type the tweet content
     // await tweetInput.sendKeys(content); // Your tweet message
@@ -203,7 +205,7 @@ export async function automateTwitterPost(credentials, content) {
     // Locate the tweet button
     const tweetButton = await driver.wait(
         until.elementLocated(By.xpath('//button[@data-testid="tweetButtonInline"]')),
-        5000
+        10000000
     );
 
     // Check if the button is enabled before clicking
