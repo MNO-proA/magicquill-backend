@@ -187,8 +187,9 @@ app.delete('/todos/:id', async (req, res) => {
 });
 
 app.get('/', async (req, res) => { 
-    res.send(<h1>Hello, Welcome to MagicQuill Core!</h1>)
-})
+    res.send('<h1>Hello, Welcome to MagicQuill Core!</h1>');
+});
+
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
