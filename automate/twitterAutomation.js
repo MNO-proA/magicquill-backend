@@ -44,17 +44,32 @@ const sleep = (milliseconds) => {
 const getRandomDelay = () => Math.floor(Math.random() * (180000 - 120000 + 1) + 120000);
 
 export async function automateTwitterPost(credentials, content) {
-    const options = new Options()
-        .windowSize({ width: 1920, height: 1080 })
-        .addArguments('--disable-dev-shm-usage')
-        .addArguments('--disable-gpu')
-        .addArguments('--disable-blink-features=AutomationControlled')
-        .addArguments(`--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36`);
+    // const options = new Options()
+    //     .windowSize({ width: 1920, height: 1080 })
+    //     .addArguments('--disable-dev-shm-usage')
+    //     .addArguments('--disable-gpu')
+    //     .addArguments('--disable-blink-features=AutomationControlled')
+    //     .addArguments(`--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36`);
 
+    // const driver = await new Builder()
+    //     .forBrowser('chrome')
+    //     .setChromeOptions(options)
+    //     .build();
+
+    // Create options for Chrome
+    const options = new Options()
+    .headless()  // Add headless mode
+    .windowSize({ width: 1920, height: 1080 }) // Set window size
+    .addArguments('--disable-dev-shm-usage') // Use /tmp instead of /dev/shm
+    .addArguments('--disable-gpu') // Disable GPU
+    .addArguments('--disable-blink-features=AutomationControlled') // Disable automation detection
+    .addArguments(`--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36`);
+
+    // Create a new instance of the Chrome driver
     const driver = await new Builder()
-        .forBrowser('chrome')
-        .setChromeOptions(options)
-        .build();
+    .forBrowser('chrome')
+    .setChromeOptions(options)
+    .build();
 
     try {
         // Inject script to remove `navigator.webdriver`
@@ -64,6 +79,7 @@ export async function automateTwitterPost(credentials, content) {
 
         // Navigate to Twitter login
         await driver.get('https://x.com/i/flow/login');
+        console.log('opened url...')
         await sleep(5000); // Adjust delay as needed
 
                 // Login process
@@ -72,10 +88,12 @@ export async function automateTwitterPost(credentials, content) {
             600000
         );
         await typeWithRandomDelay(emailInput, credentials.email);
+        console.log('typed email...')
         await sleep(1000 + Math.random() * 5000);
 
         const nextButton = await driver.findElement(By.xpath("//button[@role='button' and contains(., 'Next')]"));
         await nextButton.click();
+        console.log('next clicked...')
         await sleep(2000 + Math.random() * 1000);
 
        // Handle username if prompted
@@ -87,18 +105,21 @@ export async function automateTwitterPost(credentials, content) {
 
             if (usernameInput) {
                 await typeWithRandomDelay(usernameInput, credentials.username);
+                console.log('username typed...')
                 await sleep(1000 + Math.random() * 500);
 
                 // Locate the "Next" button
                 const nextUsernameButton = await driver.findElement(
                     By.xpath('//button[@data-testid="ocfEnterTextNextButton"]')
                 );
+                
 
                 // Check if the button is enabled before clicking
                 const isEnabled = await nextUsernameButton.isEnabled();
                 
                 if (isEnabled) {
                     await nextUsernameButton.click(); // Click if enabled
+                    console.log('next clicked...')
                     await sleep(2000 + Math.random() * 1000);
                 } else {
                     console.log('Next button is disabled, continuing...');
@@ -117,6 +138,7 @@ export async function automateTwitterPost(credentials, content) {
             1000000
         );
         await typeWithRandomDelay(passwordInput, credentials.password);
+        console.log('password typed...')
         await sleep(1000 + Math.random() * 500);
 
         // Check for the login button and its state
@@ -127,11 +149,13 @@ export async function automateTwitterPost(credentials, content) {
         const isEnabled = await loginButton.isEnabled();
 
         if (isEnabled) {
-            await loginButton.click();  // Prefer clicking if the button is enabled
+            await loginButton.click();  
+            console.log('Login clicked...')
         } else {
             console.log('Login button is disabled, trying to log in with Enter key instead.');
             const actions = driver.actions({ async: true });
             await actions.sendKeys(Key.ENTER).perform();  // Fallback to Enter key
+            console.log('Login entered...')
         }
         
 
@@ -174,6 +198,7 @@ export async function automateTwitterPost(credentials, content) {
 
        // Paste the content from the clipboard into the tweet textarea
     await tweetInput.sendKeys(Key.CONTROL + 'v');
+    console.log('tweet pasted...')
 
     // Locate the tweet button
     const tweetButton = await driver.wait(

@@ -48,10 +48,10 @@ app.options('*', cors()); // Enable pre-flight requests for all routes
 app.post('/api/post-tweet', async (req, res) => {
     const { content, credentials } = req.body;
 
-    console.log('Content Type:', typeof content); // Check type
-    console.log('Content Value:', content); // Check actual value
-    console.log(credentials);
-    
+    // console.log('Content Type:', typeof content); // Check type
+    // console.log('Content Value:', content); // Check actual value
+    // console.log(credentials);
+    console.log("processing...")
     try {
         const response = await automateTwitterPost(credentials, content);
         res.json({ success: response });
