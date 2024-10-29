@@ -33,13 +33,15 @@ const port = 3000;
 // app.use(requireAuth({ apiKey: process.env.CLERK_SECRET_KEY }))
 app.use(express.json());
 
-const corsOptions = {
-    origin: 'http://localhost:5173', 
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-    allowedHeaders: ['Content-Type', 'Authorization'], 
-  };
-  
-app.use(cors(corsOptions));
+// CORS setup
+app.use(cors({
+    origin: 'http://localhost:5173',  // Allow your frontend origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow preflight and other methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
+  }));
+
+app.options('*', cors()); // Enable pre-flight requests for all routes
+
 
 
 
@@ -184,6 +186,10 @@ app.delete('/todos/:id', async (req, res) => {
     return res.status(result.success ? 200 : 404).json(result);
 });
 
+app.get('/', async (req, res) => { 
+    res.send(<h1>Hello, Welcome to MagicQuill Core!</h1>)
+})
+
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running on port ${port}`);
 });
