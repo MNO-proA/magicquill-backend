@@ -197,12 +197,15 @@ export async function automateTwitterPost(credentials, content) {
             await sleep(5000);
             
             const tweetInput = await driver.wait(
-                until.elementLocated(By.css('div[data-testid="tweetTextarea_0"]')),
-                20000
+                until.elementLocated(By.xpath('//div[@data-testid="tweetTextarea_0" and @contenteditable="true"]')),
+                1000000
             );
+            console.log('waiting for tweet input....')
             
             await driver.wait(until.elementIsVisible(tweetInput), 10000);
+            console.log('visible tweet input....')
             await driver.wait(until.elementIsEnabled(tweetInput), 10000);
+            console.log('enabled tweet input....')
             
             // Sanitize and encode content for JavaScript execution
             const sanitizedContent = content
@@ -213,6 +216,7 @@ export async function automateTwitterPost(credentials, content) {
             
             // Try multiple methods to input text with emoji support
             try {
+                console.log('attempting to input tweet....')
                 // Method 1: Using executeScript with sanitized content
                 await driver.executeScript("arguments[0].click();", tweetInput);
                 await driver.executeScript(`
@@ -260,6 +264,7 @@ export async function automateTwitterPost(credentials, content) {
             // Try multiple methods to locate and click the tweet button
             try {
                 // Method 1: Direct click
+                console.log('tweet inputted, waiting for button to post')
                 const tweetButton = await driver.wait(
                     until.elementLocated(By.css('[data-testid="tweetButtonInline"]')),
                     10000
