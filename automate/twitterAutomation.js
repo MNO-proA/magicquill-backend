@@ -58,8 +58,8 @@ export async function automateTwitterPost(credentials, content) {
 
     // Create options for Chrome
     const options = new Options()
-    .headless()  // Add headless mode
     .windowSize({ width: 1920, height: 1080 }) // Set window size
+    .addArguments('--headless') // Enable headless mode
     .addArguments('--disable-dev-shm-usage') // Use /tmp instead of /dev/shm
     .addArguments('--disable-gpu') // Disable GPU
     .addArguments('--disable-blink-features=AutomationControlled') // Disable automation detection
