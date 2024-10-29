@@ -12,17 +12,6 @@ async function copyToClipboard(text) {
 }
 
 
-async function typeWithRandomDelay(element, text) {
-  // Ensure text is iterable
-  if (typeof text !== 'string') {
-      console.error('Provided text is not a string:', text);
-      throw new TypeError('Text must be a string');
-  }
-  for (const char of text) {
-      await element.sendKeys(char);
-      await sleep(50 + Math.random() * 100);
-  }
-}
 
 
 // const credentials = {
@@ -31,9 +20,9 @@ async function typeWithRandomDelay(element, text) {
 //     'username': 'OfosuEmerald'
 // }
 
-// // const gmail = 'ofosuemerald@gmail.com'
-// // const password = 'emeraldofosu2022'
-// // const username = 'OfosuEmerald'
+// const gmail = 'ofosuemerald@gmail.com'
+// const password = 'emeraldofosu2022'
+// const username = 'OfosuEmerald'
 
 // const content = 'What is happening?!'
 
@@ -44,6 +33,7 @@ const sleep = (milliseconds) => {
 const getRandomDelay = () => Math.floor(Math.random() * (180000 - 120000 + 1) + 120000);
 
 export async function automateTwitterPost(credentials, content) {
+    // // headfull config
     // const options = new Options()
     //     .windowSize({ width: 1920, height: 1080 })
     //     .addArguments('--disable-dev-shm-usage')
@@ -56,21 +46,36 @@ export async function automateTwitterPost(credentials, content) {
     //     .setChromeOptions(options)
     //     .build();
 
-    // Create options for Chrome
+    // Headless configs
     const options = new Options()
-    .windowSize({ width: 1920, height: 1080 }) // Set window size
-    .addArguments('--headless') // Enable headless mode
-    .addArguments('--disable-dev-shm-usage') // Use /tmp instead of /dev/shm
-    .addArguments('--disable-gpu') // Disable GPU
-    .addArguments('--disable-blink-features=AutomationControlled') // Disable automation detection
-    .addArguments(`--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36`);
-
+            .windowSize({ width: 1920, height: 1080 })
+            .addArguments('--headless=new') // Use new headless mode
+            .addArguments('--disable-dev-shm-usage')
+            .addArguments('--disable-gpu')
+            .addArguments('--no-sandbox')
+            .addArguments('--disable-setuid-sandbox')
+            .addArguments('--disable-blink-features=AutomationControlled')
+            .addArguments('--disable-web-security')
+            .addArguments('--allow-running-insecure-content')
+            .addArguments('--lang=en-US')
+            .addArguments(`--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36`);
     // Create a new instance of the Chrome driver
     const driver = await new Builder()
     .forBrowser('chrome')
     .setChromeOptions(options)
     .build();
 
+    async function typeWithRandomDelay(element, text) {
+        // Ensure text is iterable
+        await driver.wait(until.elementIsVisible(element), 1000000);
+        await driver.wait(until.elementIsEnabled(element), 1000000);
+    
+        for (const char of text) {
+            await element.sendKeys(char);
+            await sleep(50 + Math.random() * 100);
+        }
+      }
+    
     try {
         // Inject script to remove `navigator.webdriver`
         await driver.executeScript(`
@@ -96,11 +101,11 @@ export async function automateTwitterPost(credentials, content) {
         console.log('next clicked...')
         await sleep(2000 + Math.random() * 1000);
 
-       // Handle username if prompted
+    //    Handle username if prompted
         try {
             const usernameInput = await driver.wait(
                 until.elementLocated(By.xpath('//input[@data-testid="ocfEnterTextTextInput"]')),
-                10000000
+                1000
             );
 
             if (usernameInput) {
@@ -127,19 +132,31 @@ export async function automateTwitterPost(credentials, content) {
             } else {
                 console.log('No username prompt, continuing...');
             }
-        } catch (e) {
-            console.log('Error occurred:', e);
-        }
 
+        } catch (error) {
+            console.log()
+        }
+            
 
         // Enter password
-        const passwordInput = await driver.wait(
-            until.elementLocated(By.xpath('//input[@type="password" and @autocomplete="current-password"]')),
-            10000000
-        );
-        await typeWithRandomDelay(passwordInput, credentials.password);
-        console.log('password typed...')
-        await sleep(1000 + Math.random() * 500);
+        try {
+            // Enter password
+            console.log('Waiting for password input...');
+            const passwordInput = await driver.wait(
+                until.elementLocated(By.xpath('//input[@type="password" and @autocomplete="current-password"]')),
+                1000000
+            );
+        
+            // Ensure the password input is focused
+            await passwordInput.click(); // Click to focus on it
+            await typeWithRandomDelay(passwordInput, credentials.password);
+            console.log('password typed...');
+            await sleep(1000 + Math.random() * 500);
+        
+        } catch (error) {
+            console.log('Error entering password:', error);
+        }
+       
 
         // Check for the login button and its state
         const loginButton = await driver.findElement(
@@ -173,57 +190,77 @@ export async function automateTwitterPost(credentials, content) {
         //     }
         // }
 
-        // Handle posting a tweet
-    try {
-        console.log('Logged in successful, waiting for tweet input....')
-        const tweetInput = await driver.wait(
-            until.elementLocated(By.xpath('//div[@data-testid="tweetTextarea_0" and @contenteditable="true"]')),
-            1000000 // Timeout of 10 seconds
-        );
-    
-        // Ensure the element is visible and enabled
-        await driver.wait(until.elementIsVisible(tweetInput), 10000000);
-        await driver.wait(until.elementIsEnabled(tweetInput), 10000000);
+        
+    // Replace your tweet posting section with this:
+        try {
+            console.log('Logged in successful, waiting for tweet input....')
+            const tweetInput = await driver.wait(
+                until.elementLocated(By.xpath('//div[@data-testid="tweetTextarea_0" and @contenteditable="true"]')),
+                1000000
+            );
 
-    // Clear any existing text (if necessary)
-    // This may not work for contenteditable divs, so you can skip this step if it fails.
-    // await tweetInput.clear(); // Optional
+            await driver.wait(until.elementIsVisible(tweetInput), 10000000);
+            await driver.wait(until.elementIsEnabled(tweetInput), 10000000);
 
-    // Copy the content to the clipboard
-    await copyToClipboard(content);
-    console.log('content copied to clipboard...')
+            // Copy content to clipboard
+            await copyToClipboard(content);
+            console.log('content copied to clipboard...')
+            await sleep(2000);
 
-    // // Type the tweet content
-    // await tweetInput.sendKeys(content); // Your tweet message
-       // Wait briefly to ensure the clipboard has the content
-    await sleep(5000);
+            // Click and paste content
+            await tweetInput.click();
+            await tweetInput.sendKeys(Key.CONTROL + 'v');
+            console.log('tweet pasted...')
+            await sleep(2000);
 
-       // Paste the content from the clipboard into the tweet textarea
-    await tweetInput.sendKeys(Key.CONTROL + 'v');
-    console.log('tweet pasted...')
+            // Try multiple methods to locate and click the tweet button
+            try {
+                // Method 1: Direct click
+                const tweetButton = await driver.wait(
+                    until.elementLocated(By.css('[data-testid="tweetButtonInline"]')),
+                    10000
+                );
+                await driver.executeScript("arguments[0].click();", tweetButton);
+                console.log('Tweet posted via JavaScript click');
+            } catch (error) {
+                console.log('First method failed, trying alternative...');
+                try {
+                    // Method 2: Force click via JavaScript
+                    const button = await driver.findElement(By.css('[data-testid="tweetButtonInline"]'));
+                    await driver.executeScript(`
+                        var event = new MouseEvent('click', {
+                            'view': window,
+                            'bubbles': true,
+                            'cancelable': true
+                        });
+                        arguments[0].dispatchEvent(event);
+                    `, button);
+                    console.log('Tweet posted via custom event');
+                } catch (error) {
+                    console.log('Second method failed, trying final alternative...');
+                    try {
+                        // Method 3: Using keyboard shortcuts
+                        await driver.actions()
+                            .keyDown(Key.CONTROL)
+                            .sendKeys(Key.RETURN)
+                            .keyUp(Key.CONTROL)
+                            .perform();
+                        console.log('Tweet posted via keyboard shortcut');
+                    } catch (error) {
+                        console.error('All posting methods failed:', error);
+                    }
+                }
+            }
 
-    // Locate the tweet button
-    const tweetButton = await driver.wait(
-        until.elementLocated(By.xpath('//button[@data-testid="tweetButtonInline"]')),
-        10000000
-    );
-
-    // Check if the button is enabled before clicking
-    const isEnabled = await tweetButton.isEnabled();
-    
-    if (isEnabled) {
-        await tweetButton.click(); // Click if enabled
-        console.log('Tweet posted successfully!');
-        return true;
-    } else {
-        console.log('Tweet button is disabled, cannot post.');
-    }
-
-    // Wait after posting if necessary
-    await sleep(2000 + Math.random() * 1000);
-    } catch (e) {
-        console.log('Error occurred:', e);
-    }
+            // Wait to confirm post
+            await sleep(5000);
+            console.log('Tweet posted successfully!');
+            
+            return true;
+        } catch (e) {
+            console.log('Error occurred:', e);
+            return false;
+        }
      
     } catch (error) {
         console.error('Error during Twitter automation:', error);
