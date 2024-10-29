@@ -194,14 +194,12 @@ export async function automateTwitterPost(credentials, content) {
     // Replace your tweet posting section with this:
         try {
             console.log('Logged in successful, waiting for tweet input....')
-            await sleep(5000);
-            
             const tweetInput = await driver.wait(
-                until.elementLocated(By.xpath('//div[@data-testid="tweetTextarea_0" and @contenteditable="true"]')),
-                1000000
+                until.elementLocated(By.css('div[data-testid="tweetTextarea_0_label"]')),
+                2000000
             );
             console.log('waiting for tweet input....')
-            
+        
             await driver.wait(until.elementIsVisible(tweetInput), 10000);
             console.log('visible tweet input....')
             await driver.wait(until.elementIsEnabled(tweetInput), 10000);
